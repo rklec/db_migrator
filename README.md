@@ -35,7 +35,7 @@ using the `ora_migrator` plugin.
 
 A superuser sets the stage:
 
-```PLpgSQL
+```sql
 CREATE EXTENSION oracle_fdw;
 
 CREATE SERVER oracle FOREIGN DATA WRAPPER oracle_fdw
@@ -53,7 +53,7 @@ and Oracle user `orauser` has the `SELECT ANY DICTIONARY` privilege.
 Now we connect as `migrator` and perform the migration so that all objects
 will belong to this user:
 
-```PLpgSQL
+```sql
 CREATE EXTENSION ora_migrator;
 
 SELECT db_migrate(
@@ -157,7 +157,7 @@ make install
 The extension is installed in the database to which you want to migrate the
 data with the SQL command
 
-```PLpgSQL
+```sql
 CREATE EXTENSION db_migrator;
 ```
 
@@ -1184,7 +1184,7 @@ These foreign tables or views must be created:
 
 ### table of schemas ###
 
-```PLpgSQL
+```sql
 schemas (
    schema text NOT NULL
 )
@@ -1192,7 +1192,7 @@ schemas (
 
 ### table of sequences ###
 
-```PLpgSQL
+```sql
 sequences (
    schema        text    NOT NULL,
    sequence_name text    NOT NULL,
@@ -1219,7 +1219,7 @@ sequences (
 
 ### table of tables ###
 
-```PLpgSQL
+```sql
 tables (
    schema     text NOT NULL,
    table_name text NOT NULL
@@ -1228,7 +1228,7 @@ tables (
 
 ### table of columns of tables and views ###
 
-```PLpgSQL
+```sql
 columns (
    schema        text    NOT NULL,
    table_name    text    NOT NULL,
@@ -1265,7 +1265,7 @@ and the `views` table.
 
 ### table of check constraints ###
 
-```PLpgSQL
+```sql
 checks (
    schema          text    NOT NULL,
    table_name      text    NOT NULL,
@@ -1292,7 +1292,7 @@ checks (
 
 ### table of primary key and unique constraint columns ###
 
-```PLpgSQL
+```sql
 keys (
    schema          text    NOT NULL,
    table_name      text    NOT NULL,
@@ -1321,7 +1321,7 @@ For a multi-column constraint, the table will have one row per column.
 
 ### table of foreign key constraint columns ###
 
-```PLpgSQL
+```sql
 foreign_keys (
    schema          text    NOT NULL,
    table_name      text    NOT NULL,
@@ -1351,7 +1351,7 @@ For a multi-column constraint, the table will have one row per column.
 
 ### table of partitions ###
 
-```PLpgSQL
+```sql
 partitions (
     schema         name    NOT NULL,
     table_name     name    NOT NULL,
@@ -1384,7 +1384,7 @@ partitions (
 
 ### table of subpartitions ###
 
-```PLpgSQL
+```sql
 subpartitions (
     schema            name    NOT NULL,
     table_name        name    NOT NULL,
@@ -1401,7 +1401,7 @@ For explanations, see `partitions` above.
 
 ### table of views ###
 
-```PLpgSQL
+```sql
 views (
    schema     text NOT NULL,
    view_name  text NOT NULL,
@@ -1415,7 +1415,7 @@ The columns of the view are defines in the `columns` table.
 
 ### table of functions and procedures ###
 
-```PLpgSQL
+```sql
 functions (
    schema        text    NOT NULL,
    function_name text    NOT NULL,
@@ -1431,7 +1431,7 @@ functions (
 
 ### table of indexes ###
 
-```PLpgSQL
+```sql
 indexes (
    schema        text    NOT NULL,
    table_name    text    NOT NULL,
@@ -1449,7 +1449,7 @@ indexes (
 
 ### table of index columns ###
 
-```PLpgSQL
+```sql
 index_columns (
    schema        text    NOT NULL,
    table_name    text    NOT NULL,
@@ -1473,7 +1473,7 @@ index_columns (
 
 ### table of triggers ###
 
-```PLpgSQL
+```sql
 triggers (
    schema            text    NOT NULL,
    table_name        text    NOT NULL,
@@ -1500,7 +1500,7 @@ triggers (
 
 ### table of table privileges ###
 
-```PLpgSQL
+```sql
 table_privs (
    schema     text    NOT NULL,
    table_name text    NOT NULL,
@@ -1513,7 +1513,7 @@ table_privs (
 
 ### table of column privileges ###
 
-```PLpgSQL
+```sql
 column_privs (
    schema      text    NOT NULL,
    table_name  text    NOT NULL,
