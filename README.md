@@ -35,15 +35,17 @@ using the `ora_migrator` plugin.
 
 A superuser sets the stage:
 
-    CREATE EXTENSION oracle_fdw;
+```PLpgSQL
+CREATE EXTENSION oracle_fdw;
 
-    CREATE SERVER oracle FOREIGN DATA WRAPPER oracle_fdw
-       OPTIONS (dbserver '//dbserver.mydomain.com/ORADB');
+CREATE SERVER oracle FOREIGN DATA WRAPPER oracle_fdw
+   OPTIONS (dbserver '//dbserver.mydomain.com/ORADB');
 
-    GRANT USAGE ON FOREIGN SERVER oracle TO migrator;
+GRANT USAGE ON FOREIGN SERVER oracle TO migrator;
 
-    CREATE USER MAPPING FOR migrator SERVER oracle
-       OPTIONS (user 'orauser', password 'orapwd');
+CREATE USER MAPPING FOR migrator SERVER oracle
+   OPTIONS (user 'orauser', password 'orapwd');
+```
 
 PostgreSQL user `migrator` has the privilege to create PostgreSQL schemas
 and Oracle user `orauser` has the `SELECT ANY DICTIONARY` privilege.
@@ -51,39 +53,43 @@ and Oracle user `orauser` has the `SELECT ANY DICTIONARY` privilege.
 Now we connect as `migrator` and perform the migration so that all objects
 will belong to this user:
 
-    CREATE EXTENSION ora_migrator;
+```PLpgSQL
+CREATE EXTENSION ora_migrator;
 
-    SELECT db_migrate(
-       plugin => 'ora_migrator',
-       server => 'oracle',
-       only_schemas => '{TESTSCHEMA1,TESTSCHEMA2}'
-    );
+SELECT db_migrate(
+   plugin => 'ora_migrator',
+   server => 'oracle',
+   only_schemas => '{TESTSCHEMA1,TESTSCHEMA2}'
+);
+```
 
-    NOTICE:  Creating staging schemas "fdw_stage" and "pgsql_stage" ...
-    NOTICE:  Creating foreign metadata views in schema "fdw_stage" ...
-    NOTICE:  Creating schemas ...
-    NOTICE:  Creating sequences ...
-    NOTICE:  Creating foreign tables ...
-    NOTICE:  Migrating table testschema1.baddata ...
-    WARNING:  Error loading table data for testschema1.baddata
-    DETAIL:  invalid byte sequence for encoding "UTF8": 0x00: 
-    NOTICE:  Migrating table testschema1.log ...
-    NOTICE:  Migrating table testschema1.tab1 ...
-    NOTICE:  Migrating table testschema1.tab2 ...
-    NOTICE:  Migrating table testschema2.tab3 ...
-    NOTICE:  Creating UNIQUE and PRIMARY KEY constraints ...
-    WARNING:  Error creating primary key or unique constraint on table testschema1.baddata
-    DETAIL:  relation "testschema1.baddata" does not exist: 
-    NOTICE:  Creating FOREIGN KEY constraints ...
-    NOTICE:  Creating CHECK constraints ...
-    NOTICE:  Creating indexes ...
-    NOTICE:  Setting column default values ...
-    NOTICE:  Dropping staging schemas ...
-    NOTICE:  Migration completed with 2 errors.
-     db_migrate 
-    ------------
-              2
-    (1 row)
+```
+NOTICE:  Creating staging schemas "fdw_stage" and "pgsql_stage" ...
+NOTICE:  Creating foreign metadata views in schema "fdw_stage" ...
+NOTICE:  Creating schemas ...
+NOTICE:  Creating sequences ...
+NOTICE:  Creating foreign tables ...
+NOTICE:  Migrating table testschema1.baddata ...
+WARNING:  Error loading table data for testschema1.baddata
+DETAIL:  invalid byte sequence for encoding "UTF8": 0x00: 
+NOTICE:  Migrating table testschema1.log ...
+NOTICE:  Migrating table testschema1.tab1 ...
+NOTICE:  Migrating table testschema1.tab2 ...
+NOTICE:  Migrating table testschema2.tab3 ...
+NOTICE:  Creating UNIQUE and PRIMARY KEY constraints ...
+WARNING:  Error creating primary key or unique constraint on table testschema1.baddata
+DETAIL:  relation "testschema1.baddata" does not exist: 
+NOTICE:  Creating FOREIGN KEY constraints ...
+NOTICE:  Creating CHECK constraints ...
+NOTICE:  Creating indexes ...
+NOTICE:  Setting column default values ...
+NOTICE:  Dropping staging schemas ...
+NOTICE:  Migration completed with 2 errors.
+ db_migrate 
+------------
+          2
+(1 row)
+```
 
 Even though the migration of one table failed because of bad data in
 the Oracle database, the rest of the data were migrated successfully.
@@ -137,17 +143,23 @@ Installation
 The extension files must be placed in the `extension` subdirectory of
 the PostgreSQL shared files directory, which can be found with
 
-    pg_config --sharedir
+```shell
+pg_config --sharedir
+```
 
 If the extension building infrastructure PGXS is installed, you can do that
 simply with
 
-    make install
+```shell
+make install
+```
 
 The extension is installed in the database to which you want to migrate the
 data with the SQL command
 
-    CREATE EXTENSION db_migrator;
+```PLpgSQL
+CREATE EXTENSION db_migrator;
+```
 
 This statement can be executed by any user with the right to create
 functions in the `public` schema (or the schema you specified in the
@@ -1172,22 +1184,26 @@ These foreign tables or views must be created:
 
 ### table of schemas ###
 
-    schemas (
-       schema text NOT NULL
-    )
+```PLpgSQL
+schemas (
+   schema text NOT NULL
+)
+```
 
 ### table of sequences ###
 
-    sequences (
-       schema        text    NOT NULL,
-       sequence_name text    NOT NULL,
-       min_value     numeric,
-       max_value     numeric,
-       increment_by  numeric NOT NULL,
-       cyclical      boolean NOT NULL,
-       cache_size    integer NOT NULL,
-       last_value    numeric NOT NULL
-    )
+```PLpgSQL
+sequences (
+   schema        text    NOT NULL,
+   sequence_name text    NOT NULL,
+   min_value     numeric,
+   max_value     numeric,
+   increment_by  numeric NOT NULL,
+   cyclical      boolean NOT NULL,
+   cache_size    integer NOT NULL,
+   last_value    numeric NOT NULL
+)
+```
 
 - `min_value` and `max_value` are the minimal and maximal values the
   sequence value can assume
@@ -1203,25 +1219,29 @@ These foreign tables or views must be created:
 
 ### table of tables ###
 
-    tables (
-       schema     text NOT NULL,
-       table_name text NOT NULL
-    )
+```PLpgSQL
+tables (
+   schema     text NOT NULL,
+   table_name text NOT NULL
+)
+```
 
 ### table of columns of tables and views ###
 
-    columns (
-       schema        text    NOT NULL,
-       table_name    text    NOT NULL,
-       column_name   text    NOT NULL,
-       position      integer NOT NULL,
-       type_name     text    NOT NULL,
-       length        integer NOT NULL,
-       precision     integer,
-       scale         integer,
-       nullable      boolean NOT NULL,
-       default_value text
-    )
+```PLpgSQL
+columns (
+   schema        text    NOT NULL,
+   table_name    text    NOT NULL,
+   column_name   text    NOT NULL,
+   position      integer NOT NULL,
+   type_name     text    NOT NULL,
+   length        integer NOT NULL,
+   precision     integer,
+   scale         integer,
+   nullable      boolean NOT NULL,
+   default_value text
+)
+```
 
 Note that this table has to contain columns for both the `tables`
 and the `views` table.
@@ -1245,14 +1265,16 @@ and the `views` table.
 
 ### table of check constraints ###
 
-    checks (
-       schema          text    NOT NULL,
-       table_name      text    NOT NULL,
-       constraint_name text    NOT NULL,
-       deferrable      boolean NOT NULL,
-       deferred        boolean NOT NULL,
-       condition       text    NOT NULL
-    )
+```PLpgSQL
+checks (
+   schema          text    NOT NULL,
+   table_name      text    NOT NULL,
+   constraint_name text    NOT NULL,
+   deferrable      boolean NOT NULL,
+   deferred        boolean NOT NULL,
+   condition       text    NOT NULL
+)
+```
 
 - `constraint_name` identifies the constraint, but the name won't be migrated
 
@@ -1270,16 +1292,18 @@ and the `views` table.
 
 ### table of primary key and unique constraint columns ###
 
-    keys (
-       schema          text    NOT NULL,
-       table_name      text    NOT NULL,
-       constraint_name text    NOT NULL,
-       deferrable      boolean NOT NULL,
-       deferred        boolean NOT NULL,
-       column_name     text    NOT NULL,
-       position        integer NOT NULL,
-       is_primary      boolean NOT NULL
-    )
+```PLpgSQL
+keys (
+   schema          text    NOT NULL,
+   table_name      text    NOT NULL,
+   constraint_name text    NOT NULL,
+   deferrable      boolean NOT NULL,
+   deferred        boolean NOT NULL,
+   column_name     text    NOT NULL,
+   position        integer NOT NULL,
+   is_primary      boolean NOT NULL
+)
+```
 
 - `constraint_name` identifies the constraint, but the name won't be migrated
 
@@ -1297,19 +1321,21 @@ For a multi-column constraint, the table will have one row per column.
 
 ### table of foreign key constraint columns ###
 
-    foreign_keys (
-       schema          text    NOT NULL,
-       table_name      text    NOT NULL,
-       constraint_name text    NOT NULL,
-       deferrable      boolean NOT NULL,
-       deferred        boolean NOT NULL,
-       delete_rule     text    NOT NULL,
-       column_name     text    NOT NULL,
-       position        integer NOT NULL,
-       remote_schema   text    NOT NULL,
-       remote_table    text    NOT NULL,
-       remote_column   text    NOT NULL
-    )
+```PLpgSQL
+foreign_keys (
+   schema          text    NOT NULL,
+   table_name      text    NOT NULL,
+   constraint_name text    NOT NULL,
+   deferrable      boolean NOT NULL,
+   deferred        boolean NOT NULL,
+   delete_rule     text    NOT NULL,
+   column_name     text    NOT NULL,
+   position        integer NOT NULL,
+   remote_schema   text    NOT NULL,
+   remote_table    text    NOT NULL,
+   remote_column   text    NOT NULL
+)
+```
 
 - `constraint_name` identifies the constraint, but the name won't be migrated
 
@@ -1325,15 +1351,17 @@ For a multi-column constraint, the table will have one row per column.
 
 ### table of partitions ###
 
-    partitions (
-        schema         name    NOT NULL,
-        table_name     name    NOT NULL,
-        partition_name name    NOT NULL,
-        type           text    NOT NULL,
-        key            text    NOT NULL,
-        is_default     boolean NOT NULL,
-        values         text[]
-    )
+```PLpgSQL
+partitions (
+    schema         name    NOT NULL,
+    table_name     name    NOT NULL,
+    partition_name name    NOT NULL,
+    type           text    NOT NULL,
+    key            text    NOT NULL,
+    is_default     boolean NOT NULL,
+    values         text[]
+)
+```
 
 - `type` is one of the supported partitioning methods `LIST`, `RANGE` or `HASH`
 
@@ -1356,26 +1384,30 @@ For a multi-column constraint, the table will have one row per column.
 
 ### table of subpartitions ###
 
-    subpartitions (
-        schema            name    NOT NULL,
-        table_name        name    NOT NULL,
-        partition_name    name    NOT NULL,
-        subpartition_name name    NOT NULL,
-        type              text    NOT NULL,
-        key               text    NOT NULL,
-        is_default        boolean NOT NULL,
-        values            text[]
-    )
+```PLpgSQL
+subpartitions (
+    schema            name    NOT NULL,
+    table_name        name    NOT NULL,
+    partition_name    name    NOT NULL,
+    subpartition_name name    NOT NULL,
+    type              text    NOT NULL,
+    key               text    NOT NULL,
+    is_default        boolean NOT NULL,
+    values            text[]
+)
+```
 
 For explanations, see `partitions` above.
 
 ### table of views ###
 
-    views (
-       schema     text NOT NULL,
-       view_name  text NOT NULL,
-       definition text NOT NULL
-    )
+```PLpgSQL
+views (
+   schema     text NOT NULL,
+   view_name  text NOT NULL,
+   definition text NOT NULL
+)
+```
 
 - `definition` is the `SELECT` statement that defines the view
 
@@ -1383,12 +1415,14 @@ The columns of the view are defines in the `columns` table.
 
 ### table of functions and procedures ###
 
-    functions (
-       schema        text    NOT NULL,
-       function_name text    NOT NULL,
-       is_procedure  boolean NOT NULL,
-       source        text    NOT NULL
-    )
+```PLpgSQL
+functions (
+   schema        text    NOT NULL,
+   function_name text    NOT NULL,
+   is_procedure  boolean NOT NULL,
+   source        text    NOT NULL
+)
+```
 
 - `is_procedure` is `FALSE` for functions and `TRUE` for procedures
 
@@ -1397,13 +1431,15 @@ The columns of the view are defines in the `columns` table.
 
 ### table of indexes ###
 
-    indexes (
-       schema        text    NOT NULL,
-       table_name    text    NOT NULL,
-       index_name    text    NOT NULL,
-       uniqueness    boolean NOT NULL,
-       where_clause  text
-    )
+```PLpgSQL
+indexes (
+   schema        text    NOT NULL,
+   table_name    text    NOT NULL,
+   index_name    text    NOT NULL,
+   uniqueness    boolean NOT NULL,
+   where_clause  text
+)
+```
 
 - `index_name` identifies the index, but the name won't be migrated
 
@@ -1413,15 +1449,17 @@ The columns of the view are defines in the `columns` table.
 
 ### table of index columns ###
 
-    index_columns (
-       schema        text    NOT NULL,
-       table_name    text    NOT NULL,
-       index_name    text    NOT NULL,
-       position      integer NOT NULL,
-       descend       boolean NOT NULL,
-       is_expression boolean NOT NULL,
-       column_name   text    NOT NULL
-    )
+```PLpgSQL
+index_columns (
+   schema        text    NOT NULL,
+   table_name    text    NOT NULL,
+   index_name    text    NOT NULL,
+   position      integer NOT NULL,
+   descend       boolean NOT NULL,
+   is_expression boolean NOT NULL,
+   column_name   text    NOT NULL
+)
+```
 
 - `position` defines the order of columns in a multi-column index
 
@@ -1435,16 +1473,18 @@ The columns of the view are defines in the `columns` table.
 
 ### table of triggers ###
 
-    triggers (
-       schema            text    NOT NULL,
-       table_name        text    NOT NULL,
-       trigger_name      text    NOT NULL,
-       trigger_type      text    NOT NULL,
-       triggering_event  text    NOT NULL,
-       for_each_row      boolean NOT NULL,
-       when_clause       text,
-       trigger_body      text    NOT NULL
-    )
+```PLpgSQL
+triggers (
+   schema            text    NOT NULL,
+   table_name        text    NOT NULL,
+   trigger_name      text    NOT NULL,
+   trigger_type      text    NOT NULL,
+   triggering_event  text    NOT NULL,
+   for_each_row      boolean NOT NULL,
+   when_clause       text,
+   trigger_body      text    NOT NULL
+)
+```
 
 - `trigger_type` should be `BEFORE`, `AFTER` or `INSTEAD OF`
 
@@ -1460,26 +1500,30 @@ The columns of the view are defines in the `columns` table.
 
 ### table of table privileges ###
 
-    table_privs (
-       schema     text    NOT NULL,
-       table_name text    NOT NULL,
-       privilege  text    NOT NULL,
-       grantor    text    NOT NULL,
-       grantee    text    NOT NULL,
-       grantable  boolean NOT NULL
-    )
+```PLpgSQL
+table_privs (
+   schema     text    NOT NULL,
+   table_name text    NOT NULL,
+   privilege  text    NOT NULL,
+   grantor    text    NOT NULL,
+   grantee    text    NOT NULL,
+   grantable  boolean NOT NULL
+)
+```
 
 ### table of column privileges ###
 
-    column_privs (
-       schema      text    NOT NULL,
-       table_name  text    NOT NULL,
-       column_name text    NOT NULL,
-       privilege   text    NOT NULL,
-       grantor     text    NOT NULL,
-       grantee     text    NOT NULL,
-       grantable   boolean NOT NULL
-    )
+```PLpgSQL
+column_privs (
+   schema      text    NOT NULL,
+   table_name  text    NOT NULL,
+   column_name text    NOT NULL,
+   privilege   text    NOT NULL,
+   grantor     text    NOT NULL,
+   grantee     text    NOT NULL,
+   grantable   boolean NOT NULL
+)
+```
 
 Data type translation function
 ------------------------------
